@@ -1,4 +1,5 @@
 from enum import Enum
+import random
 
 class Field:
     def __init__(self, x, y):
@@ -7,6 +8,8 @@ class Field:
         self.terrain = TerrainType.NONE
         self.feature = TerrainFeature.NONE
         self.naturalWonder = NaturalWonder.NONE
+        self.resource = Resource.NONE
+        self.isRiver = False
 
     def isNeighbour(self, field):
         if self.x == field.x and abs(self.y-field.y)==1:
@@ -26,6 +29,61 @@ class Field:
 
     def SetNaturalWonder(self, wonder):
         self.naturalWonder = wonder
+
+    def isHills(self):
+        return self.terrain == TerrainType.DESERT_HILLS or \
+        self.terrain == TerrainType.GRASSLAND_HILLS or \
+        self.terrain == TerrainType.PLAINS_HILLS or \
+        self.terrain == TerrainType.SNOW_HILLS or \
+        self.terrain == TerrainType.TUNDRA_HILLS
+
+    def canContainEncampment(self):
+        if not self.BasicWonderConditions():
+            return False
+        if self.isNeighbour(Field(4,4)):
+            return False
+        return True
+
+    def canContainCampus(self):
+        return self.BasicWonderConditions()
+
+    def canContainAqueduct(self, fieldList):
+        if not self.BasicWonderConditions():
+            return False
+        if not self.isNeighbour(Field(4,4)):
+            return False
+        if self.isRiver is True:
+            return True
+        for field in fieldList:
+            if field.terrain == TerrainType.MOUNTAINS or \
+                field.terrain == TerrainType.COAST_AND_LAKE or \
+                field.feature == TerrainFeature.OASIS:
+                if self.isNeighbour(field):
+                    return True
+        return False
+
+    def BasicWonderConditions(self):
+        if self.x == 4 and self.y == 4:
+            return False
+        if self.terrain == TerrainType.MOUNTAINS or\
+            self.terrain == TerrainType.COAST_AND_LAKE or\
+            self.terrain == TerrainType.OCEAN or\
+            self.terrain == TerrainType.NATURAL_WONDER or\
+            self.terrain == TerrainType.NONE:
+                return False
+        if self.feature == TerrainFeature.FLOODPLAINS:
+            return False
+        return True
+
+    def Randomise(self):
+        self.terrain = random.choice(list(TerrainType))
+        if self.terrain == TerrainType.NATURAL_WONDER:
+            self.naturalWonder = random.choice(list(NaturalWonder))
+        else:
+            if(random.random()>0.5):
+                self.feature = random.choice(list(TerrainFeature))
+            if(random.random()>0.7):
+                self.resource = random.choice(list(Resource))
 
 class TerrainType(Enum):
     COAST_AND_LAKE = 1
@@ -70,4 +128,51 @@ class NaturalWonder(Enum):
     TSINGY_DE_BEMARAHA = 14
     ULURU = 15
     YOSEMITE = 16
-    NONE = 17
+    DELICATE_ARCH = 17
+    EYE_OF_THE_SAHARA = 18
+    LAKE_RETBA = 19
+    MATTERHORN = 20
+    MOUNT_RORAIMA = 21
+    UBSUNUR_HOLLOW = 22
+    ZHANGYE_DANXIA = 23
+    KAKADU = 24
+    PINNACLES = 25
+    VINLAND = 26
+    NONE = 27
+
+class Resource(Enum):
+    BANANAS = 1
+    CATTLE = 2
+    COPPER = 3
+    CRABS = 4
+    DEER= 5
+    FISH = 6
+    RICE = 7
+    SHEEP = 8
+    STONE = 9
+    WHEAT = 10
+    CITRUS = 11
+    COCOA = 12
+    COFFEE = 13
+    COTTON = 14
+    DIAMONDS = 15
+    DYES = 16
+    FURS = 17
+    GYPSUM = 18
+    INCENSE = 19
+    IVORY = 20
+    JADE = 21
+    MARBLE = 22
+    MERCURY = 23
+    PEARLS = 24
+    SALT = 25
+    SILK = 26
+    SILVER = 27
+    SPICES = 28
+    SUGAR = 29
+    TEA = 30
+    TOBACCO = 31
+    TRUFFLES = 32
+    WHALES = 33
+    WINE = 34
+    NONE = 35

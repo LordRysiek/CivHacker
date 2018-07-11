@@ -5,15 +5,10 @@ class Wonder:
         self.name = name
         self.function = function
 
-    def CanItBeBuilt(self, fieldsList, field):
-        return function(fields, field)
-
-    def WhereCanItBeBuilt(self, fieldsList):
-        indexes = []
-        for i in range(len(fieldsList)):
-            if self.CanItBeBuilt(self, fieldsList, fieldsList[i]):
-                indexes.append(i)
-        return indexes
+    def WhereCanItBeBuilt(self, fieldList):
+        return self.function(fieldList)
+        #returns list in form (fieldIndex, districtsList),
+        #where districtsList is a list of tuples(districtName, districtFieldIndex)
 
 class WonderName(Enum):
     ALHAMBRA = 1
@@ -46,6 +41,31 @@ class WonderName(Enum):
     ORACLE = 28
     OXFORD_UNIVERSITY = 29
     PETRA = 30
+    POTALA_PALACE = 31
+    PYRAMIDS = 32
+    RUHR_VALLEY = 33
+    STATUE_OF_LIBERTY = 34
+    ST_BASILS_BATHEDRAL = 35
+    STONEHENGE = 36
+    SYDNEY_OPERA_HOUSE = 37
+    TAJ_MAHAL = 38
+    TEMPLE_OF_ARTEMIS = 39
+    TERACOTTA_ARMY = 40
+    VENETIAN_ARSENAL = 41
+    NONE = 42
 
-#http://civilization.wikia.com/wiki/Wonder_(Civ6)
-#
+class DistrictName(Enum):
+    CAMPUS = 1
+    HOLY_SITE = 2
+    THEATER_SQUARE = 3
+    ENCAMPMENT = 4
+    HARBOR = 5
+    COMMERCIAL_HUB = 6
+    INDUSTRIAL_ZONE = 7
+    ENTERTAINMENT_COMPLEX = 8
+    AQUEDUCT = 9
+    AERODROME = 10
+    SPACEPORT = 11
+    GOVERMENT_PLAZA = 12
+    WATER_PARK = 13
+    NONE = 14
