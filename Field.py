@@ -37,26 +37,47 @@ class Field:
         self.terrain == TerrainType.SNOW_HILLS or \
         self.terrain == TerrainType.TUNDRA_HILLS
 
+    def isAdjacentToCity(self):
+        return self.isNeighbour(Field(4,4))
+
     def canContainEncampment(self):
         if not self.BasicWonderConditions():
             return False
-        if self.isNeighbour(Field(4,4)):
+        if self.isAdjacentToCity():
             return False
         return True
 
     def canContainCampus(self):
         return self.BasicWonderConditions()
 
+    def canContainHolySite(self):
+        return self.BasicWonderConditions()
+
+    def canContainCommercialHub(self):
+        return self.BasicWonderConditions()
+
+    def canContainEntertainmentComplex(self):
+        return self.BasicWonderConditions()
+
+    def canContainTheaterSquare(self):
+        return self.BasicWonderConditions()
+
+    def canContainGovermentPlaza(self):
+        return self.BasicWonderConditions()
+
+    def canContainHarbor(self):
+        return self.terrain == TerrainType.COAST or self.terrain == TerrainType.LAKE
+
     def canContainAqueduct(self, fieldList):
         if not self.BasicWonderConditions():
             return False
-        if not self.isNeighbour(Field(4,4)):
+        if not self.isAdjacentToCity():
             return False
         if self.isRiver is True:
             return True
         for field in fieldList:
             if field.terrain == TerrainType.MOUNTAINS or \
-                field.terrain == TerrainType.COAST_AND_LAKE or \
+                field.terrain == TerrainType.LAKE or \
                 field.feature == TerrainFeature.OASIS:
                 if self.isNeighbour(field):
                     return True
@@ -66,7 +87,8 @@ class Field:
         if self.x == 4 and self.y == 4:
             return False
         if self.terrain == TerrainType.MOUNTAINS or\
-            self.terrain == TerrainType.COAST_AND_LAKE or\
+            self.terrain == TerrainType.COAST or\
+            self.terrain == TerrainType.LAKE or\
             self.terrain == TerrainType.OCEAN or\
             self.terrain == TerrainType.NATURAL_WONDER or\
             self.terrain == TerrainType.NONE:
@@ -86,7 +108,7 @@ class Field:
                 self.resource = random.choice(list(Resource))
 
 class TerrainType(Enum):
-    COAST_AND_LAKE = 1
+    COAST = 1
     DESERT = 2
     DESERT_HILLS = 3
     GRASSLAND = 4
@@ -99,8 +121,9 @@ class TerrainType(Enum):
     SNOW_HILLS = 11
     TUNDRA = 12
     TUNDRA_HILLS = 13
-    NATURAL_WONDER = 14
-    NONE = 15
+    NATURAL_WONDER = 14     #TODO: check if natural wonders have terraintype despite them being natural wonders
+    LAKE = 15
+    NONE = 16
 
 class TerrainFeature(Enum):
     FLOODPLAINS = 1

@@ -52,7 +52,8 @@ class WonderName(Enum):
     TEMPLE_OF_ARTEMIS = 39
     TERACOTTA_ARMY = 40
     VENETIAN_ARSENAL = 41
-    NONE = 42
+    GREAT_LIGHTHOUSE = 42
+    NONE = 43
 
 class DistrictName(Enum):
     CAMPUS = 1
