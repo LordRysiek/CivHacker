@@ -148,7 +148,7 @@ wonderList.append(Wonder(WonderName.GREAT_ZIMBABWE,
                         lambda fieldList: [(field, (DistrictName.COMMERCIAL_HUB, distField))
                                             for field in fieldList if field.BasicWonderConditions()
                                             and any(x.resource == Resource.CATTLE
-                                            and x.isNeighbour(field) for x in fieldListWithNearestBorders)
+                                                and x.isNeighbour(field) for x in fieldListWithNearestBorders)
                                             for distField in fieldList if distField.isNeighbour(field)
                                             and distField.canContainCommercialHub()
                                             and distField.resource is not Resource.CATTLE]))
@@ -175,10 +175,10 @@ wonderList.append(Wonder(WonderName.HUEY_TEOCALLI,
                                             for field in fieldList if field.BasicWonderConditions()
                                             and field.terrain == TerrainType.LAKE
                                             and any(x.isNeighbour(field)
-                                            and x.terrain is not TerrainType.LAKE
-                                            and x.terrain is not TerrainType.COAST
-                                            and x.terrain is not TerrainType.OCEAN
-                                            for x in fieldListWithNearestBorders)]))
+                                                and x.terrain is not TerrainType.LAKE
+                                                and x.terrain is not TerrainType.COAST
+                                                and x.terrain is not TerrainType.OCEAN
+                                                for x in fieldListWithNearestBorders)]))
 wonderList.append(Wonder(WonderName.JEBEL_BARKAL,
                         lambda fieldList: [(field,)
                                             for field in fieldList if field.terrain == TerrainType.DESERT_HILLS
@@ -188,9 +188,9 @@ wonderList.append(Wonder(WonderName.KILWA_KISIWANI,
                                             for field in fieldList if field.BasicWonderConditions()
                                             and not field.isHills()
                                             and any(x.isNeighbour(field)
-                                            and (x.terrain is TerrainType.LAKE
-                                            or x.terrain is TerrainType.COAST)
-                                            for x in fieldListWithNearestBorders)]))
+                                                and (x.terrain is TerrainType.LAKE
+                                                or x.terrain is TerrainType.COAST)
+                                                for x in fieldListWithNearestBorders)]))
 wonderList.append(Wonder(WonderName.KOTOKU_IN,
                         lambda fieldList: [(field, (DistrictName.HOLY_SITE, distField))
                                             for field in fieldList if field.BasicWonderConditions()
@@ -230,13 +230,75 @@ wonderList.append(Wonder(WonderName.PETRA,
                                             for field in fieldList if not field.isHills()
                                             and (field.terrain is TerrainType.DESERT
                                             or field.feature is TerrainFeature.FLOODPLAINS)
-                                            and (self.x is not 4 or self.y is not 4)]))
+                                            and (field.x is not 4 or field.y is not 4)]))
 wonderList.append(Wonder(WonderName.POTALA_PALACE,
                         lambda fieldList: [(field,)
                                             for field in fieldList if field.BasicWonderConditions()
                                             and field.isHills()
                                             and any(x.isNeighbour(field)
-                                            and (x.terrain is TerrainType.MOUNTAINS)
-                                            for x in fieldListWithNearestBorders)]))
+                                                and (x.terrain is TerrainType.MOUNTAINS)
+                                                for x in fieldListWithNearestBorders)]))
+wonderList.append(Wonder(WonderName.PYRAMIDS,
+                        lambda fieldList: [(field,)
+                                            for field in fieldList if field.terrain == TerrainType.DESERT
+                                            and (field.x is not 4 or field.y is not 4)]))
+wonderList.append(Wonder(WonderName.RUHR_VALLEY,
+                        lambda fieldList: [(field, (DistrictName.INDUSTRIAL_ZONE, distField))
+                                            for field in fieldList if field.isRiver
+                                            and field.BasicWonderConditions()
+                                            for distField in fieldList if distField.isNeighbour(field)
+                                            and distField.canContainIndustrialZone()]))
+wonderList.append(Wonder(WonderName.STATUE_OF_LIBERTY,
+                        lambda fieldList: [(field, (DistrictName.HARBOR, distField))
+                                            for field in fieldList if field.terrain == TerrainType.COAST
+                                            or field.terrain == TerrainType.LAKE
+                                            and any(x.isNeighbour(field)
+                                                and x.terrain is not TerrainType.LAKE
+                                                and x.terrain is not TerrainType.COAST
+                                                and x.terrain is not TerrainType.OCEAN
+                                                for x in fieldListWithNearestBorders)
+                                            for distField in fieldList if distField.isNeighbour(field)
+                                            and distField.canContainHarbor()]))
+wonderList.append(Wonder(WonderName.ST_BASILS_BATHEDRAL,
+                        lambda fieldList: [(field,)
+                                            for field in fieldList if field.BasicWonderConditions()
+                                            and field.isAdjacentToCity()]))
+wonderList.append(Wonder(WonderName.GREAT_ZIMBABWE,
+                        lambda fieldList: [(field,)
+                                            for field in fieldList if field.BasicWonderConditions()
+                                            and any(x.resource == Resource.STONE
+                                                and x.isNeighbour(field) for x in fieldListWithNearestBorders)
+                                            and not field.isHills()]))
+wonderList.append(Wonder(WonderName.SYDNEY_OPERA_HOUSE,
+                        lambda fieldList: [(field, (DistrictName.HARBOR, distField))
+                                            for field in fieldList if field.terrain == TerrainType.COAST
+                                            for distField in fieldList if distField.isNeighbour(field)
+                                            and distField.canContainHarbor()]))
+wonderList.append(Wonder(WonderName.TAJ_MAHAL,
+                        lambda fieldList: [(field,)
+                                            for field in fieldList if field.BasicWonderConditions()
+                                            and field.isRiver]))
+wonderList.append(Wonder(WonderName.TEMPLE_OF_ARTEMIS,
+                        lambda fieldList: [(field,)
+                                            for field in fieldList if field.BasicWonderConditions()
+                                            and any((x.resource == Resource.DEER
+                                                    or x.resource == Resource.TRUFFLES
+                                                    or x.resource == Resource.FURS
+                                                    or x.resource == Resource.IVORY)
+                                                and x.isNeighbour(field) for x in fieldListWithNearestBorders)
+                                            and not field.isHills()]))
+wonderList.append(Wonder(WonderName.TERACOTTA_ARMY,
+                        lambda fieldList: [(field, (DistrictName.ENCAMPMENT, distField))
+                                            for field in fieldList if field.BasicWonderConditions()
+                                            and (field.terrain == TerrainType.GRASSLAND
+                                            or field.terrain == TerrainType.PLAINS)
+                                            for distField in fieldList if distField.isNeighbour(field)
+                                            and distField.canContainEncampment()]))
+wonderList.append(Wonder(WonderName.VENETIAN_ARSENAL,
+                        lambda fieldList: [(field, (DistrictName.INDUSTRIAL_ZONE, distField))
+                                            for field in fieldList if field.terrain == TerrainType.COAST
+                                            for distField in fieldList if distField.isNeighbour(field)
+                                            and distField.canContainIndustrialZone()]))
 
-print([(field[0].terrain,field[0].x,field[0].y) for field in wonderList[8].WhereCanItBeBuilt(fieldList)])
+for wonder in wonderList:
+    wonder.WhereCanItBeBuilt()

@@ -50,6 +50,9 @@ class Field:
     def canContainCampus(self):
         return self.BasicWonderConditions()
 
+    def canContainIndustrialZone(self):
+        return self.BasicWonderConditions()
+
     def canContainHolySite(self):
         return self.BasicWonderConditions()
 
@@ -90,7 +93,7 @@ class Field:
             self.terrain == TerrainType.COAST or\
             self.terrain == TerrainType.LAKE or\
             self.terrain == TerrainType.OCEAN or\
-            self.terrain == TerrainType.NATURAL_WONDER or\
+            self.feature == TerrainType.NATURAL_WONDER or\
             self.terrain == TerrainType.NONE:
                 return False
         if self.feature == TerrainFeature.FLOODPLAINS:
@@ -99,13 +102,12 @@ class Field:
 
     def Randomise(self):
         self.terrain = random.choice(list(TerrainType))
-        if self.terrain == TerrainType.NATURAL_WONDER:
+        if(random.random()>0.5):
+            self.feature = random.choice(list(TerrainFeature))
+        if self.feature == TerrainFeature.NATURAL_WONDER:
             self.naturalWonder = random.choice(list(NaturalWonder))
-        else:
-            if(random.random()>0.5):
-                self.feature = random.choice(list(TerrainFeature))
-            if(random.random()>0.7):
-                self.resource = random.choice(list(Resource))
+        if(random.random()>0.7):
+            self.resource = random.choice(list(Resource))
 
 class TerrainType(Enum):
     COAST = 1
@@ -121,9 +123,8 @@ class TerrainType(Enum):
     SNOW_HILLS = 11
     TUNDRA = 12
     TUNDRA_HILLS = 13
-    NATURAL_WONDER = 14     #TODO: check if natural wonders have terraintype despite them being natural wonders
-    LAKE = 15
-    NONE = 16
+    LAKE = 14
+    NONE = 15
 
 class TerrainFeature(Enum):
     FLOODPLAINS = 1
@@ -132,7 +133,10 @@ class TerrainFeature(Enum):
     OASIS = 4
     RAINFOREST = 5
     WOODS = 6
-    NONE = 7
+    REEF = 7
+    NATURAL_WONDER = 8
+    CATARACT = 9
+    NONE = 10
 
 class NaturalWonder(Enum):
     CLIFFS_OF_DOVER = 1
@@ -161,7 +165,8 @@ class NaturalWonder(Enum):
     KAKADU = 24
     PINNACLES = 25
     VINLAND = 26
-    NONE = 27
+    HA_LONG_BAY = 27
+    NONE = 28
 
 class Resource(Enum):
     BANANAS = 1
