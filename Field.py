@@ -93,7 +93,7 @@ class Field:
             self.terrain == TerrainType.COAST or\
             self.terrain == TerrainType.LAKE or\
             self.terrain == TerrainType.OCEAN or\
-            self.feature == TerrainType.NATURAL_WONDER or\
+            self.feature == TerrainFeature.NATURAL_WONDER or\
             self.terrain == TerrainType.NONE:
                 return False
         if self.feature == TerrainFeature.FLOODPLAINS:

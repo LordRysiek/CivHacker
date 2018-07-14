@@ -5,8 +5,8 @@ class Wonder:
         self.name = name
         self.function = function
 
-    def WhereCanItBeBuilt(self, fieldList):
-        return self.function(fieldList)
+    def WhereCanItBeBuilt(self, fieldList, fieldListWithNearestBorders):
+        return self.function(fieldList, fieldListWithNearestBorders)
         #returns list in form (fieldIndex, districtsList),
         #where districtsList is a list of tuples(districtName, districtFieldIndex)
 
