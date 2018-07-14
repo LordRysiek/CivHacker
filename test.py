@@ -7,6 +7,7 @@ from Wonder import Wonder
 from Wonder import WonderName
 from Wonder import DistrictName
 from WonderListGenerator import GenerateWonderList
+from WondersModel import WondersModel
 
 fieldListWithNearestBorders = []
 for x in range(0,9):
@@ -39,6 +40,6 @@ for field in fieldList:
     print(field.resource)
 """
 wonderList = GenerateWonderList()
-possiblePlacements = []
-for wonder in wonderList:
-    possiblePlacements.append((wonder.name, wonder.WhereCanItBeBuilt(fieldList, fieldListWithNearestBorders)))
+wmodel = WondersModel(wonderList, fieldList, fieldListWithNearestBorders)
+print(wmodel.GetCurrentlyPossibleWonders())
+print(wmodel.GetImpossibleWonders())
