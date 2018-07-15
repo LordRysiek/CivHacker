@@ -45,29 +45,33 @@ class WondersModel:
     def UpdateCurrentlyPossiblePlacements(self, placement):
         newCombinationIndex = -1
         if len(placement) == 1:
-            self.FFCurrentCombinations.append([placement])
             newCombinationIndex = len(self.FFCurrentCombinations)
+            self.FFCurrentCombinations.append(placement)
+            self.FFCurrentCombinationsPossibleMatchingSets.append([fieldPair[0] for fieldPair in placement[1]])
         elif len(placement) == 2:
             for i in range(len(self.FFCurrentCombinations)):
-                if(self.FFCurrentCombinations[i][0][1][0] == placement[1][0]):
+                if(self.FFCurrentCombinations[i][1][1][0] == placement[1][0]):
                     self.FFCurrentMatching[:] = [x for x in self.FFCurrentMatching
                                                             if x is not i]
                     self.FFCurrentCombinations[i].append(placement)
                     newCombinationIndex = i
+                    self.FFCurrentCombinationsPossibleMatchingSets[newCombinationIndex] =\
+                        self.FindPossibleMatchingSets(self.FFCurrentCombinations[newCombinationIndex])
                     break
             if newCombinationIndex == -1:
-                FFCurrentCombinations.append([placement])
                 newCombinationIndex = len(self.FFCurrentCombinations)
+                self.FFCurrentCombinations.append(placement)
+                self.FFCurrentCombinationsPossibleMatchingSets.append([[fieldPair[0], fieldPair[1]] for
+                                                                            fieldPair in placement[1]])
         else:
             raise NameError('Got a placement of zero or more than two length')
-        self.FFCurrentCombinationsPossibleMatchingSets[i] = self.FindPossibleMatchingSets(self.FFCurrentCombinations[i])
 
     def FindPossibleMatchingSets(self, combination):
         possibleDistrictFields = [fieldPair[1] for fieldPair in combination[0][1]]
         for placement in combination:
             districtFieldsToRemove = []
-            for pdf in range(len(possibleDistrictFields)):
-                for districtField in [fieldPair[1] for fieldPair in placement[1]]
+            for pdf in possibleDistrictFields:
+                for districtField in [fieldPair[1] for fieldPair in placement[1]]:
                     if districtField == pdf:
                         break
                 districtFieldsToRemove.append(pdf)

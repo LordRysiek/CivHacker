@@ -41,6 +41,9 @@ for field in fieldList:
 """
 wonderList = GenerateWonderList()
 wmodel = WondersModel(wonderList, fieldList, fieldListWithNearestBorders)
-print(wmodel.GetCurrentlyPossibleWonders())
-print(wmodel.GetImpossibleWonders())
+#print(wmodel.GetCurrentlyPossibleWonders())
+#print(wmodel.GetImpossibleWonders())
 wmodel.ChooseWonder(WonderName.ALHAMBRA)
+wmodel.ChooseWonder(WonderName.KOTOKU_IN)
+wmodel.ChooseWonder(WonderName.HAGIA_SOPHIA)
+wmodel.ChooseWonder(WonderName.MAHABODHI_TEMPLE)

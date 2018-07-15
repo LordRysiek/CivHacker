@@ -7,7 +7,7 @@ class Wonder:
 
     def WhereCanItBeBuilt(self, fieldList, fieldListWithNearestBorders):
         return self.function(fieldList, fieldListWithNearestBorders)
-        #returns list in form (fieldIndex, districtsList),
+        #returns list in form [(fieldIndex, districtsList)],
         #where districtsList is a list of tuples(districtName, districtFieldIndex)
 
 class WonderName(Enum):
