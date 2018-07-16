@@ -1,105 +1,345 @@
-class WondersModel:
+class WonderModel:
     """
     using modified Ford-Fulkerson algorithm for biparite graphs
     """
     def __init__(self, wonderList, fieldList, fieldListWithNearestBorders):
-        allPlacements = []
-        self.possiblePlacements = []
-        self.impossiblePlacements = []
-        self.chosenPlacements = []
-        self.FFCurrentMatching = [-1 for x in range(36)]
-        self.FFCurrentCombinations = []
-        self.FFCurrentCombinationsPossibleMatchingSets = []
-        for wonder in wonderList:
-            allPlacements.append((wonder.name, wonder.WhereCanItBeBuilt(fieldList, fieldListWithNearestBorders)))
-        for placement in allPlacements:
-            if placement[1]:
-                self.possiblePlacements.append(placement)
-            else:
-                self.impossiblePlacements.append(placement)
-        self.currentlyPossiblePlacements = self.possiblePlacements
+        self.groupList = []
+        self.fieldsByWonder = {}
+        self.nextWonders = {}
+        self.match = {}
+        for key in wonderList:
+            self.fieldsByWonder[key] = functionByWonder[key](fieldList, fieldListWithNearestBorders)
+        for key in self.fieldsByWonder if self.fieldsByWonder[key]:
+            self.nextWonders[key] = Prediction() #it doens't really matter,
+                                                #we only need keys in the first PredictNextWonders() iteration
+        for field in fieldList:
+            self.match[field] = -1 #that means no group is yet assigned to any field
+        wonderModel.nextWonders = self.PredictNextWonders()
 
-    def GetCurrentlyPossibleWonders(self):
-        return [placement[0] for placement in self.currentlyPossiblePlacements]
 
-    def GetCurrentlyImpossibleWonders(self):
-        return [placement[0] for placement in self.possiblePlacements if placement not in self.currentlyPossiblePlacements]
+    def PredictNextWonders(self):
+        
 
-    def GetImpossibleWonders(self):
-        return [placement[0] for placement in self.impossiblePlacements]
 
-    def ChooseWonder(self, wonderName):
-        placement = self.FindPlacement(wonderName, self.possiblePlacements)
-        if not placement:
-            raise NameError('Tried to choose wonder that was not possible to choose')
-        self.chosenPlacements.append(placement)
-        self.currentlyPossiblePlacements.remove(placement)
-        self.UpdateCurrentlyPossiblePlacements(placement)
-    #private
-    def FindPlacement(self, wonderName, list):
-        for x in list:
-            if x[0] == wonderName:
-                return x
-        return 0
 
-    def UpdateCurrentlyPossiblePlacements(self, placement):
-        newCombinationIndex = -1
-        if len(placement) == 1:
-            newCombinationIndex = len(self.FFCurrentCombinations)
-            self.FFCurrentCombinations.append(placement)
-            self.FFCurrentCombinationsPossibleMatchingSets.append([fieldPair[0] for fieldPair in placement[1]])
-        elif len(placement) == 2:
-            for i in range(len(self.FFCurrentCombinations)):
-                if(self.FFCurrentCombinations[i][1][1][0] == placement[1][0]):
-                    self.FFCurrentMatching[:] = [x for x in self.FFCurrentMatching
-                                                            if x is not i]
-                    self.FFCurrentCombinations[i].append(placement)
-                    newCombinationIndex = i
-                    self.FFCurrentCombinationsPossibleMatchingSets[newCombinationIndex] =\
-                        self.FindPossibleMatchingSets(self.FFCurrentCombinations[newCombinationIndex])
-                    break
-            if newCombinationIndex == -1:
-                newCombinationIndex = len(self.FFCurrentCombinations)
-                self.FFCurrentCombinations.append(placement)
-                self.FFCurrentCombinationsPossibleMatchingSets.append([[fieldPair[0], fieldPair[1]] for
-                                                                            fieldPair in placement[1]])
-        else:
-            raise NameError('Got a placement of zero or more than two length')
+class Group:
+    def __init__(self, firstWonder, fieldsOfThisWonder):
+        self.wonders = []
+        self.wonders.append(firstWonder)
+        self.combinations = []
+        for fieldPair in fieldsOfThisWonder:
+            self.combinations.append(Combination(fieldPair[0], fieldPair[1]))
+        self.district = districtByWonder[firstWonder]
 
-    def FindPossibleMatchingSets(self, combination):
-        possibleDistrictFields = [fieldPair[1] for fieldPair in combination[0][1]]
-        for placement in combination:
-            districtFieldsToRemove = []
-            for pdf in possibleDistrictFields:
-                for districtField in [fieldPair[1] for fieldPair in placement[1]]:
-                    if districtField == pdf:
-                        break
-                districtFieldsToRemove.append(pdf)
-            possibleDistrictFields = [pdf for pdf in possibleDistrictFields if pdf not in districtFieldsToRemove]
+class Combination:
+    def __init__(self, wonderField, districtField):
+        self.wondersFields = []
+        self.wondersFields.append(wonderField)
+        self.districtField = districtField
 
-        possibleMatchingSets = []
-        for pdf in possibleDistrictFields:
-            combinationFieldsForPdf = []
-            for placement in combination:
-                combinationFieldsForPdf.append(placement[0], [fieldPair[0] for fieldPair in placement[1] if fieldPair[1] is pdf])
-            chosenFields = []
-            visitedFields = [0 for x in range(len(combination))]
-            i = 0
-            while True:
-                if i == len(combination):
-                    chosenFields.append(pdf)
-                    possibleMatchingSets.append(chosenFields)
-                    chosenFields.pop()
-                    chosenFields.pop()
-                    i = i-1
-                    continue
-                if len(combinationFieldsForPdf[i][1]) == visitedFields[i]:
-                    if i==0:
-                        break
-                    chosenFields.pop()
-                    i = i-1
-                    continue
-                chosenFields.append(combinationFieldsForPdf[i][1][visitedFields[i]])
-                visitedFields[i] = visitedFields[i] + 1
-                i = i+1
-        return possibleMatchingSets
+class Prediction:
+    def __init__(self):
+        self.combinations = []
+        self.match = {}
+
+districtByWonder = {
+WonderName.ALHAMBRA: DistrictName.ENCAMPMENT,
+WonderName.AMUNDSEN_SCOTT_RESEARCH_STATION: DistrictName.CAMPUS,
+WonderName.ANGKOR_WAT: DistrictName.AQUEDUCT,
+WonderName.APADANA: DistrictName.NONE,
+WonderName.BIG_BEN: DistrictName.COMMERCIAL_HUB,
+WonderName.BOLSHOI_THEATRE: DistrictName.THEATER_SQUARE,
+WonderName.BROADWAY: DistrictName.THEATER_SQUARE,
+WonderName.CASA_DE_CONTRARACION: DistrictName.GOVERMENT_PLAZA,
+WonderName.CHICHEN_ITZA: DistrictName.NONE,
+WonderName.COLOSSEUM: DistrictName.ENTERTAINMENT_COMPLEX,
+WonderName.COLOSSUS: DistrictName.HARBOR,
+WonderName.CRISTO_REDENTOR: DistrictName.NONE,
+WonderName.EIFFEL_TOWER: DistrictName.NONE,
+WonderName.ESTADIO_DO_MARACANA: DistrictName.ENTERTAINMENT_COMPLEX,
+WonderName.FORBIDDEN_CITY: DistrictName.NONE,
+WonderName.GREAT_LIBRARY: DistrictName.CAMPUS,
+WonderName.GREAT_LIGHTHOUSE: DistrictName.HARBOR,
+WonderName.GREAT_ZIMBABWE: DistrictName.COMMERCIAL_HUB,
+WonderName.HAGIA_SOPHIA: DistrictName.HOLY_SITE,
+WonderName.HANGING_GARDENS: DistrictName.NONE,
+WonderName.HERMITAGE: DistrictName.NONE,
+WonderName.HUEY_TEOCALLI: DistrictName.NONE,
+WonderName.JEBEL_BARKAL: DistrictName.NONE,
+WonderName.KILWA_KISIWANI: DistrictName.NONE,
+WonderName.KOTOKU_IN: DistrictName.HOLY_SITE,
+WonderName.MAHABODHI_TEMPLE: DistrictName.HOLY_SITE,
+WonderName.MAUSOLEUM_AT_HALICARNASSUS: DistrictName.HARBOR,
+WonderName.MONT_ST_MICHEL: DistrictName.NONE,
+WonderName.ORACLE: DistrictName.NONE,
+WonderName.OXFORD_UNIVERSITY: DistrictName.CAMPUS,
+WonderName.PETRA: DistrictName.NONE,
+WonderName.POTALA_PALACE: DistrictName.NONE,
+WonderName.PYRAMIDS: DistrictName.NONE,
+WonderName.RUHR_VALLEY: DistrictName.INDUSTRIAL_ZONE,
+WonderName.STATUE_OF_LIBERTY: DistrictName.HARBOR,
+WonderName.ST_BASILS_BATHEDRAL: DistrictName.NONE,
+WonderName.GREAT_ZIMBABWE: DistrictName.NONE,
+WonderName.SYDNEY_OPERA_HOUSE: DistrictName.HARBOR,
+WonderName.TAJ_MAHAL: DistrictName.NONE,
+WonderName.TEMPLE_OF_ARTEMIS: DistrictName.NONE,
+WonderName.TERACOTTA_ARMY: DistrictName.ENCAMPMENT,
+WonderName.VENETIAN_ARSENAL: DistrictName.INDUSTRIAL_ZONE,
+}
+functionByWonder = {
+WonderName.ALHAMBRA:
+                        lambda fieldList, fieldListWithNearestBorders: [(field, distField))
+                                            for field in fieldList if field.isHills() and field.BasicWonderConditions()
+                                            for distField in fieldList if distField.isNeighbour(field)
+                                            and distField.canContainEncampment()]))
+WonderName.AMUNDSEN_SCOTT_RESEARCH_STATION:
+                        lambda fieldList, fieldListWithNearestBorders: [(field, distField))
+                                            for field in fieldList if field.terrain == TerrainType.SNOW or
+                                            field.terrain == TerrainType.SNOW_HILLS
+                                            for distField in fieldList if distField.isNeighbour(field)
+                                            and distField.canContainCampus()]))
+WonderName.ANGKOR_WAT:
+                        lambda fieldList, fieldListWithNearestBorders: [(field, distField))
+                                            for field in fieldList if field.BasicWonderConditions()
+                                            for distField in fieldList if distField.isNeighbour(field)
+                                            and distField.canContainAqueduct(fieldListWithNearestBorders)]))
+WonderName.APADANA:
+                        lambda fieldList, fieldListWithNearestBorders: [(field, Field(0,0))
+                                            for field in fieldList if field.BasicWonderConditions()
+                                            and field.isAdjacentToCity()]))
+WonderName.BIG_BEN:
+                        lambda fieldList, fieldListWithNearestBorders: [(field, distField))
+                                            for field in fieldList if field.BasicWonderConditions()
+                                            and field.isRiver is True
+                                            for distField in fieldList if distField.isNeighbour(field)
+                                            and distField.canContainCommercialHub()]))
+WonderName.BOLSHOI_THEATRE:
+                        lambda fieldList, fieldListWithNearestBorders: [(field, distField))
+                                            for field in fieldList if not field.isHills()
+                                            and field.BasicWonderConditions()
+                                            for distField in fieldList if distField.isNeighbour(field)
+                                            and distField.canContainTheaterSquare()]))
+WonderName.BROADWAY:
+                        lambda fieldList, fieldListWithNearestBorders: [(field, distField))
+                                            for field in fieldList if not field.isHills()
+                                            and field.BasicWonderConditions()
+                                            for distField in fieldList if distField.isNeighbour(field)
+                                            and distField.canContainTheaterSquare()]))
+WonderName.CASA_DE_CONTRARACION:
+                        lambda fieldList, fieldListWithNearestBorders: [(field, distField))
+                                            for field in fieldList if field.BasicWonderConditions()
+                                            for distField in fieldList if distField.isNeighbour(field)
+                                            and distField.canContainGovermentPlaza()]))
+WonderName.CHICHEN_ITZA:
+                        lambda fieldList, fieldListWithNearestBorders: [(field, Field(0,0))
+                                            for field in fieldList if field.BasicWonderConditions()
+                                            and field.feature == TerrainFeature.RAINFOREST]))
+WonderName.COLOSSEUM:
+                        lambda fieldList, fieldListWithNearestBorders: [(field, distField))
+                                            for field in fieldList if not field.isHills()
+                                            and field.BasicWonderConditions()
+                                            for distField in fieldList if distField.isNeighbour(field)
+                                            and distField.canContainEntertainmentComplex()]))
+WonderName.COLOSSUS:
+                        lambda fieldList, fieldListWithNearestBorders: [(field, distField))
+                                            for field in fieldList if field.terrain == TerrainType.COAST
+                                            or field.terrain == TerrainType.LAKE
+                                            for distField in fieldList if distField.isNeighbour(field)
+                                            and distField.canContainHarbor()]))
+WonderName.CRISTO_REDENTOR:
+                        lambda fieldList, fieldListWithNearestBorders: [(field, Field(0,0))
+                                            for field in fieldList if field.isHills()
+                                            and field.BasicWonderConditions()]))
+WonderName.EIFFEL_TOWER:
+                        lambda fieldList, fieldListWithNearestBorders: [(field, Field(0,0))
+                                            for field in fieldList if field.BasicWonderConditions()
+                                            and field.isAdjacentToCity()
+                                            and (field.isHills() is not True)]))
+WonderName.ESTADIO_DO_MARACANA:
+                        lambda fieldList, fieldListWithNearestBorders: [(field, distField))
+                                            for field in fieldList if not field.isHills()
+                                            and field.BasicWonderConditions()
+                                            for distField in fieldList if distField.isNeighbour(field)
+                                            and distField.canContainEntertainmentComplex()]))
+WonderName.FORBIDDEN_CITY:
+                        lambda fieldList, fieldListWithNearestBorders: [(field, Field(0,0))
+                                            for field in fieldList if field.BasicWonderConditions()
+                                            and field.isAdjacentToCity()
+                                            and (field.isHills() is not True)]))
+WonderName.GREAT_LIBRARY:
+                        lambda fieldList, fieldListWithNearestBorders: [(field, distField))
+                                            for field in fieldList if not field.isHills()
+                                            and field.BasicWonderConditions()
+                                            for distField in fieldList if distField.isNeighbour(field)
+                                            and distField.canContainCampus()]))
+WonderName.GREAT_LIGHTHOUSE:
+                        lambda fieldList, fieldListWithNearestBorders: [(field, distField))
+                                            for field in fieldList if field.terrain == TerrainType.COAST
+                                            or field.terrain == TerrainType.LAKE
+                                            for distField in fieldList if distField.isNeighbour(field)
+                                            and distField.canContainHarbor()]))
+WonderName.GREAT_ZIMBABWE:
+                        lambda fieldList, fieldListWithNearestBorders: [(field, distField))
+                                            for field in fieldList if field.BasicWonderConditions()
+                                            and any(x.resource == Resource.CATTLE
+                                                and x.isNeighbour(field) for x in fieldListWithNearestBorders)
+                                            for distField in fieldList if distField.isNeighbour(field)
+                                            and distField.canContainCommercialHub()
+                                            and distField.resource is not Resource.CATTLE]))
+WonderName.HAGIA_SOPHIA:
+                        lambda fieldList, fieldListWithNearestBorders: [(field, distField))
+                                            for field in fieldList if not field.isHills()
+                                            and field.BasicWonderConditions()
+                                            for distField in fieldList if distField.isNeighbour(field)
+                                            and distField.canContainHolySite()]))
+WonderName.HANGING_GARDENS:
+                        lambda fieldList, fieldListWithNearestBorders: [(field, Field(0,0))
+                                            for field in fieldList if field.isRiver
+                                            and field.BasicWonderConditions()]))
+WonderName.HERMITAGE:
+                        lambda fieldList, fieldListWithNearestBorders: [(field, Field(0,0))
+                                            for field in fieldList if field.isRiver
+                                            and field.BasicWonderConditions()
+                                            and field.terrain is not TerrainType.TUNDRA
+                                            and field.terrain is not TerrainType.TUNDRA_HILLS
+                                            and field.terrain is not TerrainType.DESERT
+                                            and field.terrain is not TerrainType.DESERT_HILLS]))
+WonderName.HUEY_TEOCALLI:
+                        lambda fieldList, fieldListWithNearestBorders: [(field, Field(0,0))
+                                            for field in fieldList if field.BasicWonderConditions()
+                                            and field.terrain == TerrainType.LAKE
+                                            and any(x.isNeighbour(field)
+                                                and x.terrain is not TerrainType.LAKE
+                                                and x.terrain is not TerrainType.COAST
+                                                and x.terrain is not TerrainType.OCEAN
+                                                for x in fieldListWithNearestBorders)]))
+WonderName.JEBEL_BARKAL:
+                        lambda fieldList, fieldListWithNearestBorders: [(field, Field(0,0))
+                                            for field in fieldList if field.terrain == TerrainType.DESERT_HILLS
+                                            and field.BasicWonderConditions()]))
+WonderName.KILWA_KISIWANI:
+                        lambda fieldList, fieldListWithNearestBorders: [(field, Field(0,0))
+                                            for field in fieldList if field.BasicWonderConditions()
+                                            and not field.isHills()
+                                            and any(x.isNeighbour(field)
+                                                and (x.terrain is TerrainType.LAKE
+                                                or x.terrain is TerrainType.COAST)
+                                                for x in fieldListWithNearestBorders)]))
+WonderName.KOTOKU_IN:
+                        lambda fieldList, fieldListWithNearestBorders: [(field, distField))
+                                            for field in fieldList if field.BasicWonderConditions()
+                                            for distField in fieldList if distField.isNeighbour(field)
+                                            and distField.canContainHolySite()]))
+WonderName.MAHABODHI_TEMPLE:
+                        lambda fieldList, fieldListWithNearestBorders: [(field, distField))
+                                            for field in fieldList if field.BasicWonderConditions()
+                                            and field.feature == TerrainFeature.WOODS
+                                            for distField in fieldList if distField.isNeighbour(field)
+                                            and distField.canContainHolySite()]))
+WonderName.MAUSOLEUM_AT_HALICARNASSUS:
+                        lambda fieldList, fieldListWithNearestBorders: [(field, distField))
+                                            for field in fieldList if field.terrain == TerrainType.COAST
+                                            or field.terrain == TerrainType.LAKE
+                                            for distField in fieldList if distField.isNeighbour(field)
+                                            and distField.canContainHarbor()]))
+WonderName.MONT_ST_MICHEL:
+                        lambda fieldList, fieldListWithNearestBorders: [(field, Field(0,0))
+                                            for field in fieldList if (field.feature == TerrainFeature.FLOODPLAINS
+                                            or field.feature == TerrainFeature.MARSH)
+                                            and (field.x is not 4 or field.y is not 4)]))
+WonderName.ORACLE:
+                        lambda fieldList, fieldListWithNearestBorders: [(field, Field(0,0))
+                                            for field in fieldList if field.BasicWonderConditions()
+                                            and field.isHills()]))
+WonderName.OXFORD_UNIVERSITY:
+                        lambda fieldList, fieldListWithNearestBorders: [(field, distField))
+                                            for field in fieldList if
+                                            (field.terrain is TerrainType.GRASSLAND
+                                            or field.terrain is TerrainType.PLAINS)
+                                            and field.BasicWonderConditions()
+                                            for distField in fieldList if distField.isNeighbour(field)
+                                            and distField.canContainCampus()]))
+WonderName.PETRA:
+                        lambda fieldList, fieldListWithNearestBorders: [(field, Field(0,0))
+                                            for field in fieldList if not field.isHills()
+                                            and (field.terrain is TerrainType.DESERT
+                                            or field.feature is TerrainFeature.FLOODPLAINS)
+                                            and (field.x is not 4 or field.y is not 4)]))
+WonderName.POTALA_PALACE:
+                        lambda fieldList, fieldListWithNearestBorders: [(field, Field(0,0))
+                                            for field in fieldList if field.BasicWonderConditions()
+                                            and field.isHills()
+                                            and any(x.isNeighbour(field)
+                                                and (x.terrain is TerrainType.MOUNTAINS)
+                                                for x in fieldListWithNearestBorders)]))
+WonderName.PYRAMIDS:
+                        lambda fieldList, fieldListWithNearestBorders: [(field, Field(0,0))
+                                            for field in fieldList if field.terrain == TerrainType.DESERT
+                                            and (field.x is not 4 or field.y is not 4)]))
+WonderName.RUHR_VALLEY:
+                        lambda fieldList, fieldListWithNearestBorders: [(field, distField))
+                                            for field in fieldList if field.isRiver
+                                            and field.BasicWonderConditions()
+                                            for distField in fieldList if distField.isNeighbour(field)
+                                            and distField.canContainIndustrialZone()]))
+WonderName.STATUE_OF_LIBERTY:
+                        lambda fieldList, fieldListWithNearestBorders: [(field, distField))
+                                            for field in fieldList if field.terrain == TerrainType.COAST
+                                            or field.terrain == TerrainType.LAKE
+                                            and any(x.isNeighbour(field)
+                                                and x.terrain is not TerrainType.LAKE
+                                                and x.terrain is not TerrainType.COAST
+                                                and x.terrain is not TerrainType.OCEAN
+                                                for x in fieldListWithNearestBorders)
+                                            for distField in fieldList if distField.isNeighbour(field)
+                                            and distField.canContainHarbor()]))
+WonderName.ST_BASILS_BATHEDRAL:
+                        lambda fieldList, fieldListWithNearestBorders: [(field, Field(0,0))
+                                            for field in fieldList if field.BasicWonderConditions()
+                                            and field.isAdjacentToCity()]))
+WonderName.GREAT_ZIMBABWE:
+                        lambda fieldList, fieldListWithNearestBorders: [(field, Field(0,0))
+                                            for field in fieldList if field.BasicWonderConditions()
+                                            and any(x.resource == Resource.STONE
+                                                and x.isNeighbour(field) for x in fieldListWithNearestBorders)
+                                            and not field.isHills()]))
+WonderName.SYDNEY_OPERA_HOUSE:
+                        lambda fieldList, fieldListWithNearestBorders: [(field, distField))
+                                            for field in fieldList if field.terrain == TerrainType.COAST
+                                            for distField in fieldList if distField.isNeighbour(field)
+                                            and distField.canContainHarbor()]))
+WonderName.TAJ_MAHAL:
+                        lambda fieldList, fieldListWithNearestBorders: [(field, Field(0,0))
+                                            for field in fieldList if field.BasicWonderConditions()
+                                            and field.isRiver]))
+WonderName.TEMPLE_OF_ARTEMIS:
+                        lambda fieldList, fieldListWithNearestBorders: [(field, Field(0,0))
+                                            for field in fieldList if field.BasicWonderConditions()
+                                            and any((x.resource == Resource.DEER
+                                                    or x.resource == Resource.TRUFFLES
+                                                    or x.resource == Resource.FURS
+                                                    or x.resource == Resource.IVORY)
+                                                and x.isNeighbour(field) for x in fieldListWithNearestBorders)
+                                            and not field.isHills()]))
+WonderName.TERACOTTA_ARMY:
+                        lambda fieldList, fieldListWithNearestBorders: [(field, distField))
+                                            for field in fieldList if field.BasicWonderConditions()
+                                            and (field.terrain == TerrainType.GRASSLAND
+                                            or field.terrain == TerrainType.PLAINS)
+                                            for distField in fieldList if distField.isNeighbour(field)
+                                            and distField.canContainEncampment()]))
+WonderName.VENETIAN_ARSENAL:
+                        lambda fieldList, fieldListWithNearestBorders: [(field, distField))
+                                            for field in fieldList if field.terrain == TerrainType.COAST
+                                            for distField in fieldList if distField.isNeighbour(field)
+                                            and distField.canContainIndustrialZone()]))
+
+
+
+
+
+
+
+
+
+}
