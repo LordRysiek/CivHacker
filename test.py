@@ -1,13 +1,11 @@
 from Field import Field
-from Field import TerrainType
-from Field import TerrainFeature
-from Field import NaturalWonder
-from Field import Resource
-from Wonder import Wonder
-from Wonder import WonderName
-from Wonder import DistrictName
-from WonderListGenerator import GenerateWonderList
-from WondersModel import WondersModel
+from enums import TerrainType
+from enums import TerrainFeature
+from enums import NaturalWonder
+from enums import Resource
+from enums import WonderName
+from enums import DistrictName
+from WonderModel import WonderModel
 
 fieldListWithNearestBorders = []
 for x in range(0,9):
@@ -39,11 +37,11 @@ for field in fieldList:
     print(field.naturalWonder)
     print(field.resource)
 """
-wonderList = GenerateWonderList()
-wmodel = WondersModel(wonderList, fieldList, fieldListWithNearestBorders)
+wonderList = [name for name in WonderName if name is not WonderName.NONE]
+wmodel = WonderModel(wonderList, fieldList, fieldListWithNearestBorders)
+for pair in wmodel.nextWonders:
+    print(pair, wmodel.nextWonders[pair])
 #print(wmodel.GetCurrentlyPossibleWonders())
 #print(wmodel.GetImpossibleWonders())
 #wmodel.ChooseWonder(WonderName.ALHAMBRA)
 #wmodel.ChooseWonder(WonderName.KOTOKU_IN)
-wmodel.ChooseWonder(WonderName.HAGIA_SOPHIA)
-wmodel.ChooseWonder(WonderName.MAHABODHI_TEMPLE)
