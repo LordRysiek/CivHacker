@@ -1,26 +1,24 @@
 from enums import *
 from Field import Field
+import copy
 class WonderModel:
     def __init__(self, wonderList, fieldList, fieldListWithNearestBorders):
         self.groupList = []
         self.fieldsByWonder = {}
         self.nextWonders = {}
-        self.match = {}
         for key in wonderList:
             self.fieldsByWonder[key] = functionByWonder[key](fieldList, fieldListWithNearestBorders)
         for key in self.fieldsByWonder:
              if self.fieldsByWonder[key]:
-                 self.nextWonders[key] = Prediction([],[]) #it doens't really matter,
+                 self.nextWonders[key] = Prediction([]) #it doens't really matter,
                                                 #we only need keys in the first PredictNextWonders() iteration
-        for field in fieldList:
-            self.match[field] = -1 #that means no wonder is yet assigned to any field
         self.nextWonders = self.PredictNextWonders()
 
+    def GetPossibleWonders(self):
+        return self.nextWonders.keys()
 
     def ChooseWonder(self, wonderName):
         district = districtByWonder[wonderName]
-        self.match = self.nextWonders[wonderName].match
-        foundGroup = 0
         for group in self.groupList:
             if group.district == district:
                 group.wonders.append(wonderName)
@@ -28,16 +26,62 @@ class WonderModel:
                 del self.nextWonders[wonderName]
                 self.nextWonders = self.PredictNextWonders()
                 return
-        if foundGroup == 0:
-            newGroups.append(Group(wonderName, self.fieldsByWonder[wonderName]))
-            del self.nextWonders[wonderName]
-            self.nextWonders = self.PredictNextWonders()
-            return
+        self.groupList.append(Group(wonderName, self.fieldsByWonder[wonderName]))
+        del self.nextWonders[wonderName]
+        self.nextWonders = self.PredictNextWonders()
+        return
+
+    def GetAllPossibleMatches(self):
+        i = 0
+        if not self.groupList:
+            return []
+        visited = [0 for x in range(len(self.groupList))]
+        matches = []
+        matchedFields = []
+        while True:
+            if visited[i] == len(self.groupList[i].combinations):
+                if i==0:
+                    return matches
+                for j in range(i, len(self.groupList)):
+                    visited[j] = 0
+                i = i-1
+                for j in range(len(groupList[i].combinations[visited[i]].wondersFields)):
+                    matchedFields.pop()
+                matchedFields.pop()
+                visited[i] = visited[i] + 1
+                continue
+            if self.groupList[i].combinations[visited[i]].districtField in matchedFields:
+                visited[i] = visited[i] + 1
+                continue
+            isClashing = False
+            for field in self.groupList[i].combinations[visited[i]].wondersFields:
+                if field in matchedFields:
+                    isClashing = True
+                    break
+            if isClashing:
+                visited[i] = visited[i] + 1
+                continue
+            matchedFields.extend(self.groupList[i].combinations[visited[i]].wondersFields)
+            matchedFields.append(self.groupList[i].combinations[visited[i]].districtField)
+            i = i + 1
+            if i==len(self.groupList):
+                newMatch = Match()
+                for j in range(len(self.groupList)):
+                    for k in range(len(self.groupList[j].combinations[visited[j]].wondersFields)):
+                        newMatch.wondersMatch[self.groupList[j].wonders[k]] = self.groupList[j].combinations[visited[j]].wondersFields[k]
+                    newMatch.districtsMatch[self.groupList[j].district] = self.groupList[j].combinations[visited[j]].districtField
+                matches.append(newMatch)
+                i = i-1
+                for j in range(len(self.groupList[i].combinations[visited[i]].wondersFields)):
+                    matchedFields.pop()
+                matchedFields.pop()
+                visited[i] = visited[i] + 1
+
 
     def PredictNextWonders(self):
         toReturn = {}
         for wonderName in self.nextWonders:
-            newGroups = self.groupList
+            newGroups = copy.deepcopy(self.groupList)
             districtOfNewWonder = districtByWonder[wonderName]
             foundGroup = 0
             for group in newGroups:
@@ -62,24 +106,26 @@ class WonderModel:
                         combinationsToRemove.append(combination)
                 for cTR in combinationsToRemove:
                     foundGroup.combinations.remove(cTR)
-            match = self.FindMatch(newGroups)
-            combinations = foundGroup.combinations
-            toReturn[wonderName] = Prediction(combinations, match)
+            if self.DoesMatchExist(newGroups):
+                combinations = foundGroup.combinations
+                toReturn[wonderName] = Prediction(combinations)
         return toReturn
 
-    def FindMatch(self, groupList):
+    def DoesMatchExist(self, groupList):
         i = 0
         visited = [0 for x in range(len(groupList))]
-        match = {}
         matchedFields = []
         while True:
             if visited[i] == len(groupList[i].combinations):
                 if i==0:
-                    return 0
+                    return False
                 for j in range(i, len(groupList)):
                     visited[j] = 0
                 i = i-1
-                visited[i] == visited[i] + 1
+                for j in range(len(groupList[i].combinations[visited[i]].wondersFields)):
+                    matchedFields.pop()
+                matchedFields.pop()
+                visited[i] = visited[i] + 1
                 continue
             if groupList[i].combinations[visited[i]].districtField in matchedFields:
                 visited[i] = visited[i] + 1
@@ -96,13 +142,7 @@ class WonderModel:
             matchedFields.append(groupList[i].combinations[visited[i]].districtField)
             i = i + 1
             if i==len(groupList):
-                break
-        for j in range(len(groupList)):
-            for k in range(len(groupList[j].wonders)):
-                match[ groupList[j].combinations[visited[j]].wondersFields[k] ] = groupList[j]
-            match[ groupList[j].combinations[visited[j]].districtField] = groupList[j]
-        return match
-
+                return True
 
 class Group:
     def __init__(self, firstWonder, fieldsOfThisWonder):
@@ -120,10 +160,13 @@ class Combination:
         self.districtField = districtField
 
 class Prediction:
-    def __init__(self, combinations, match):
+    def __init__(self, combinations):
         self.combinations = combinations
-        self.match = match
 
+class Match:
+    def __init__(self):
+        self.districtsMatch = {}
+        self.wondersMatch = {}
 districtByWonder = {
 WonderName.ALHAMBRA: DistrictName.ENCAMPMENT,
 WonderName.AMUNDSEN_SCOTT_RESEARCH_STATION: DistrictName.CAMPUS,
