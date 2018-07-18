@@ -1,9 +1,6 @@
 from enums import *
 from Field import Field
 class WonderModel:
-    """
-    using modified Ford-Fulkerson algorithm for biparite graphs
-    """
     def __init__(self, wonderList, fieldList, fieldListWithNearestBorders):
         self.groupList = []
         self.fieldsByWonder = {}
@@ -18,6 +15,24 @@ class WonderModel:
         for field in fieldList:
             self.match[field] = -1 #that means no wonder is yet assigned to any field
         self.nextWonders = self.PredictNextWonders()
+
+
+    def ChooseWonder(self, wonderName):
+        district = districtByWonder[wonderName]
+        self.match = self.nextWonders[wonderName].match
+        foundGroup = 0
+        for group in self.groupList:
+            if group.district == district:
+                group.wonders.append(wonderName)
+                group.combinations = self.nextWonders[wonderName].combinations
+                del self.nextWonders[wonderName]
+                self.nextWonders = self.PredictNextWonders()
+                return
+        if foundGroup == 0:
+            newGroups.append(Group(wonderName, self.fieldsByWonder[wonderName]))
+            del self.nextWonders[wonderName]
+            self.nextWonders = self.PredictNextWonders()
+            return
 
     def PredictNextWonders(self):
         toReturn = {}

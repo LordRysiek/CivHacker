@@ -41,6 +41,10 @@ wonderList = [name for name in WonderName if name is not WonderName.NONE]
 wmodel = WonderModel(wonderList, fieldList, fieldListWithNearestBorders)
 for pair in wmodel.nextWonders:
     print(pair, wmodel.nextWonders[pair])
+wmodel.ChooseWonder(WonderName.COLOSSEUM)
+print("_________________________")
+for pair in wmodel.nextWonders:
+    print(pair, wmodel.nextWonders[pair])
 #print(wmodel.GetCurrentlyPossibleWonders())
 #print(wmodel.GetImpossibleWonders())
 #wmodel.ChooseWonder(WonderName.ALHAMBRA)
